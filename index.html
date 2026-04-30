@@ -1,189 +1,553 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <title>halsi_</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #f0ead8; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
-    #__bundler_loading { position: fixed; bottom: 20px; right: 20px; font: 13px/1.4 -apple-system, BlinkMacSystemFont, sans-serif; color: #666; background: #fff; padding: 8px 14px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.12); z-index: 10000; }
-    #__bundler_thumbnail { position: fixed; inset: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #f0ead8; z-index: 9999; }
-    #__bundler_thumbnail svg { width: 100%; height: 100%; object-fit: contain; }
-    #__bundler_placeholder { color: #999; font-size: 14px; }
-  </style>
-  <noscript>
-    <style>#__bundler_loading { display: none; }</style>
-    <div style="position:fixed;bottom:12px;left:12px;font:13px/1.4 -apple-system,BlinkMacSystemFont,sans-serif;color:#999;background:rgba(255,255,255,0.9);padding:6px 12px;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,0.08);z-index:10000;">
-      This page requires JavaScript to display.
-    </div>
-  </noscript>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>halsi_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Mono:ital@0;1&family=Noto+Sans+JP:wght@300;400&display=swap" rel="stylesheet">
+<style>
+
+:root {
+  --bg:      #080808;
+  --surface: #0f0f0f;
+  --line:    #1c1c1c;
+  --muted:   #444;
+  --text:    #edebe6;
+  --dim:     #888;
+  --accent:  #ff4e1a;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans JP', sans-serif;
+  font-weight: 300;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* CURSOR */
+.cursor {
+  position: fixed;
+  top: 0; left: 0;
+  width: 10px; height: 10px;
+  background: var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transition: width .3s ease, height .3s ease, background .3s;
+  transform: translate(-50%, -50%);
+}
+.cursor.big {
+  width: 48px; height: 48px;
+  background: transparent;
+  border: 1px solid rgba(255,78,26,.5);
+}
+@media (hover: none) { .cursor { display: none; } body { cursor: auto; } }
+
+/* NAV */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px clamp(20px,5vw,60px);
+}
+.nav-logo {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: -.02em;
+  color: #fff;
+  text-decoration: none;
+}
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.nav-count {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .15em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.day-night {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  background: none;
+  border: 1px solid #222;
+  color: var(--dim);
+  padding: 7px 16px;
+  cursor: none;
+  border-radius: 100px;
+  transition: border-color .3s, color .3s;
+}
+.day-night:hover { border-color: var(--text); color: var(--text); }
+
+/* HERO */
+.hero {
+  position: relative;
+  height: 100svh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0 clamp(20px,5vw,60px) clamp(40px,6vw,72px);
+}
+
+.hero-photo {
+  position: absolute; inset: 0;
+  background-size: cover;
+  background-position: center;
+  transition: opacity 1.4s cubic-bezier(.4,0,.2,1);
+}
+.hero-photo.day   { background-image: url('bg_m.jpg'); }
+.hero-photo.night { background-image: url('bg_n.jpg'); opacity: 0; }
+body.is-night .hero-photo.day   { opacity: 0; }
+body.is-night .hero-photo.night { opacity: 1; }
+
+.hero-vignette {
+  position: absolute; inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(8,8,8,.25) 0%,
+    rgba(8,8,8,.0)  35%,
+    rgba(8,8,8,.75) 80%,
+    rgba(8,8,8,1)   100%
+  );
+}
+
+.hero-content { position: relative; z-index: 2; }
+
+.hero-eyebrow {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .25em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.4);
+  margin-bottom: 14px;
+}
+
+.hero-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: clamp(60px, 17vw, 190px);
+  line-height: .88;
+  letter-spacing: -.04em;
+  color: #fff;
+}
+.hero-title em {
+  font-style: normal;
+  color: var(--accent);
+}
+
+.hero-sub {
+  margin-top: 24px;
+  font-family: 'Space Mono', monospace;
+  font-size: clamp(9px,1.1vw,11px);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.3);
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+
+.scroll-line {
+  position: absolute;
+  bottom: 0; left: 50%;
+  width: 1px; height: 64px;
+  background: linear-gradient(to bottom, transparent, rgba(255,255,255,.2));
+  transform: translateX(-50%);
+  z-index: 2;
+  animation: pl 2.5s ease-in-out infinite;
+}
+@keyframes pl {
+  0%,100% { opacity:.4; } 50% { opacity:.1; }
+}
+
+/* WORKS SECTION */
+.works-section { background: var(--bg); padding-top: 80px; }
+
+.works-header {
+  padding: 0 clamp(20px,5vw,60px) 40px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+}
+.works-header-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.works-header-total {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+/* Work row */
+.work {
+  border-bottom: 1px solid var(--line);
+  overflow: hidden;
+  transition: background .3s;
+  cursor: none;
+  opacity: 0;
+  transform: translateY(16px);
+  animation: wIn .65s ease forwards;
+}
+.work:hover { background: var(--surface); }
+
+@keyframes wIn { to { opacity:1; transform:translateY(0); } }
+.work:nth-child(1)  { animation-delay:.04s }
+.work:nth-child(2)  { animation-delay:.09s }
+.work:nth-child(3)  { animation-delay:.14s }
+.work:nth-child(4)  { animation-delay:.19s }
+.work:nth-child(5)  { animation-delay:.24s }
+.work:nth-child(6)  { animation-delay:.29s }
+.work:nth-child(7)  { animation-delay:.34s }
+.work:nth-child(8)  { animation-delay:.39s }
+.work:nth-child(9)  { animation-delay:.44s }
+.work:nth-child(10) { animation-delay:.49s }
+
+.work-row {
+  display: grid;
+  grid-template-columns: clamp(36px,6vw,72px) 1fr 40px;
+  align-items: center;
+  gap: clamp(12px,3vw,28px);
+  padding: clamp(18px,3.5vw,36px) clamp(20px,5vw,60px);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.work-num {
+  font-family: 'Space Mono', monospace;
+  font-size: clamp(9px,1vw,11px);
+  color: var(--muted);
+  letter-spacing: .08em;
+  align-self: start;
+  padding-top: 5px;
+}
+
+.work-name {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: clamp(24px, 6vw, 76px);
+  line-height: .95;
+  letter-spacing: -.025em;
+  color: var(--text);
+  transition: color .22s;
+  word-break: break-word;
+}
+.work:hover .work-name { color: #fff; }
+.work.open  .work-name { color: var(--accent); }
+
+.work-plus {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(18px,2.5vw,30px);
+  font-weight: 400;
+  color: var(--muted);
+  text-align: right;
+  transition: transform .4s cubic-bezier(.4,0,.2,1), color .22s;
+  line-height: 1;
+}
+.work.open .work-plus {
+  transform: rotate(45deg);
+  color: var(--accent);
+}
+
+/* Expand */
+.work-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows .5s cubic-bezier(.4,0,.2,1);
+}
+.work.open .work-panel { grid-template-rows: 1fr; }
+.work-panel-inner { overflow: hidden; }
+
+.work-panel-content {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 24px;
+  padding: 4px clamp(20px,5vw,60px) 44px;
+  padding-left: calc(clamp(20px,5vw,60px) + clamp(36px,6vw,72px) + clamp(12px,3vw,28px));
+}
+@media (max-width: 540px) {
+  .work-panel-content {
+    grid-template-columns: 1fr;
+    padding-left: clamp(20px,5vw,60px);
+  }
+}
+
+.work-desc { display: flex; flex-direction: column; gap: 8px; }
+
+.work-desc-ja {
+  font-size: clamp(12px,1.5vw,14px);
+  line-height: 1.9;
+  color: rgba(237,235,230,.55);
+  letter-spacing: .04em;
+}
+.work-desc-en {
+  font-family: 'Space Mono', monospace;
+  font-style: italic;
+  font-size: clamp(10px,1.3vw,12px);
+  line-height: 1.85;
+  color: var(--muted);
+}
+
+.work-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--text);
+  text-decoration: none;
+  border: 1px solid #2a2a2a;
+  padding: 13px 20px;
+  white-space: nowrap;
+  transition: background .22s, border-color .22s, color .22s;
+  border-radius: 100px;
+}
+.work-cta::after { content: '↗'; }
+.work-cta:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* FOOTER */
+footer {
+  padding: 72px clamp(20px,5vw,60px) clamp(48px,7vw,80px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--line);
+}
+.footer-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: clamp(44px,11vw,130px);
+  letter-spacing: -.04em;
+  line-height: .9;
+  color: var(--text);
+}
+.footer-title span { color: var(--accent); }
+
+.footer-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 16px;
+}
+.footer-qr { width: 60px; opacity: .35; filter: invert(1); display: block; }
+.footer-copy {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+</style>
 </head>
 <body>
-  <div id="__bundler_thumbnail">
-  <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
-    <rect width="400" height="300" fill="#f0ead8"></rect>
-    <line x1="40" y1="90" x2="360" y2="90" stroke="#c8b890" stroke-width="1"></line>
-    <line x1="40" y1="122" x2="360" y2="122" stroke="#c8b890" stroke-width="1"></line>
-    <line x1="40" y1="154" x2="360" y2="154" stroke="#c8b890" stroke-width="1"></line>
-    <line x1="40" y1="186" x2="360" y2="186" stroke="#c8b890" stroke-width="1"></line>
-    <text x="40" y="72" font-family="serif" font-size="52" font-weight="bold" fill="#1a130c">halsi_</text>
-    <text x="40" y="110" font-family="serif" font-size="13" fill="#7a2218">01</text>
-    <text x="70" y="110" font-family="serif" font-size="13" fill="#1a130c">やみのもんすと</text>
-    <text x="40" y="142" font-family="serif" font-size="13" fill="#7a2218">02</text>
-    <text x="70" y="142" font-family="serif" font-size="13" fill="#1a130c">EC倉庫</text>
-    <text x="40" y="174" font-family="serif" font-size="13" fill="#7a2218">03</text>
-    <text x="70" y="174" font-family="serif" font-size="13" fill="#1a130c">Say Goodnight</text>
-  </svg>
-</div>
-  <div id="__bundler_loading">Unpacking...</div>
 
-  <script>
-    
-document.addEventListener('DOMContentLoaded', async function() {
-  const loading = document.getElementById('__bundler_loading');
-  function setStatus(msg) { if (loading) loading.textContent = msg; }
+<div class="cursor" id="cursor"></div>
 
-  // Error sink persists across replaceWith since it's on window, not the DOM.
-  window.addEventListener('error', function(e) {
-    var p = document.body || document.documentElement;
-    var d = document.getElementById('__bundler_err') || p.appendChild(document.createElement('div'));
-    d.id = '__bundler_err';
-    d.style.cssText = 'position:fixed;bottom:12px;left:12px;right:12px;font:12px/1.4 ui-monospace,monospace;background:#2a1215;color:#ff8a80;padding:10px 14px;border-radius:8px;border:1px solid #5c2b2e;z-index:99999;white-space:pre-wrap;max-height:40vh;overflow:auto';
-    d.textContent = (d.textContent ? d.textContent + String.fromCharCode(10) : '') +
-      '[bundle] ' + (e.message || e.type) +
-      (e.filename ? ' (' + e.filename.slice(0, 60) + ':' + e.lineno + ')' : '');
-  }, true);
+<nav>
+  <a class="nav-logo" href="#">halsi_</a>
+  <div class="nav-right">
+    <span class="nav-count">10 works</span>
+    <button class="day-night" id="dnToggle">☀ Day</button>
+  </div>
+</nav>
 
-  try {
-    const manifestEl = document.querySelector('script[type="__bundler/manifest"]');
-    const templateEl = document.querySelector('script[type="__bundler/template"]');
-    if (!manifestEl || !templateEl) {
-      setStatus('Error: missing bundle data');
-      console.error('[bundler] Missing script tags — manifestEl:', !!manifestEl, 'templateEl:', !!templateEl);
-      return;
-    }
+<section class="hero">
+  <div class="hero-photo day"></div>
+  <div class="hero-photo night"></div>
+  <div class="hero-vignette"></div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">Portfolio — Tokyo</p>
+    <h1 class="hero-title">halsi<em>_</em></h1>
+    <div class="hero-sub">
+      <span>Games &amp; Tools</span>
+      <span>Web Experiments</span>
+      <span>2024–25</span>
+    </div>
+  </div>
+  <div class="scroll-line"></div>
+</section>
 
-    const manifest = JSON.parse(manifestEl.textContent);
-    let template = JSON.parse(templateEl.textContent);
+<section class="works-section">
+  <div class="works-header">
+    <span class="works-header-label">Selected Works</span>
+    <span class="works-header-total">01 — 10</span>
+  </div>
 
-    const uuids = Object.keys(manifest);
-    setStatus('Unpacking ' + uuids.length + ' assets...');
+  <div class="work" onclick="tw(this)">
+    <div class="work-row"><span class="work-num">01</span><span class="work-name">やみのもんすと</span><span class="work-plus">+</span></div>
+    <div class="work-panel"><div class="work-panel-inner"><div class="work-panel-content">
+      <div class="work-desc">
+        <p class="work-desc-ja">モンストがメンテになると浮上する闇のモンスト</p>
+        <p class="work-desc-en">The dark MonSt that rises from the depths during maintenance.</p>
+      </div>
+      <a class="work-cta" href="https://halsistm.github.io/monsss/" target="_blank" rel="noopener">Open</a>
+    </div></div></div>
+  </div>
 
-    const blobUrls = {};
-    await Promise.all(uuids.map(async (uuid) => {
-      const entry = manifest[uuid];
-      try {
-        const binaryStr = atob(entry.data);
-        const bytes = new Uint8Array(binaryStr.length);
-        for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
+  <div class="work" onclick="tw(this)">
+    <div class="work-row"><span class="work-num">02</span><span class="work-name">EC倉庫</span><span class="work-plus">+</span></div>
+    <div class="work-panel"><div class="work-panel-inner"><div class="work-panel-content">
+      <div class="work-desc">
+        <p class="work-desc-ja">倉庫で働いている気分を充分に味わえる労働アプリ</p>
+        <p class="work-desc-en">A labor app that lets you fully experience the thrill of warehouse work.</p>
+      </div>
+      <a class="work-cta" href="https://halsistm.github.io/ec/" target="_blank" rel="noopener">Open</a>
+    </div></div></div>
+  </div>
 
-        let finalBytes = bytes;
-        if (entry.compressed) {
-          if (typeof DecompressionStream !== 'undefined') {
-            const ds = new DecompressionStream('gzip');
-            const writer = ds.writable.getWriter();
-            const reader = ds.readable.getReader();
-            writer.write(bytes);
-            writer.close();
-            const chunks = [];
-            let totalLen = 0;
-            while (true) {
-              const { done, value } = await reader.read();
-              if (done) break;
-              chunks.push(value);
-              totalLen += value.length;
-            }
-            finalBytes = new Uint8Array(totalLen);
-            let offset = 0;
-            for (const chunk of chunks) { finalBytes.set(chunk, offset); offset += chunk.length; }
-          } else {
-            console.warn('DecompressionStream not available, asset ' + uuid + ' may not render');
-          }
-        }
+  <div class="work" onclick="tw(this)">
+    <div class="work-row"><span class="work-num">03</span><span class="work-name">Say Goodnight</span><span class="work-plus">+</span></div>
+    <div class="work-panel"><div class="work-panel-inner"><div class="work-panel-content">
+      <div class="work-desc">
+        <p class="work-desc-ja">浅くて広いやつはセイグッナイするゲームそれ以外はこんにちわ</p>
+        <p class="work-desc-en">Goodnight to the shallow &amp; wide. Hello to everyone else.</p>
+      </div>
+      <a class="work-cta" href="https://halsistm.github.io/say/" target="_blank" rel="noopener">Open</a>
+    </div></div></div>
+  </div>
 
-        blobUrls[uuid] = URL.createObjectURL(new Blob([finalBytes], { type: entry.mime }));
-      } catch (err) {
-        console.error('Failed to decode asset ' + uuid + ':', err);
-        blobUrls[uuid] = URL.createObjectURL(new Blob([], { type: entry.mime }));
-      }
-    }));
+  <div class="work" onclick="tw(this)">
+    <div class="work-row"><span class="work-num">04</span><span class="work-name">∞Gallery</span><span class="work-plus">+</span></div>
+    <div class="work-panel"><div class="work-panel-inner"><div class="work-panel-content">
+      <div class="work-desc">
+        <p class="work-desc-ja">おしゃれなルームを冒険して謎の生命体を捕獲するゲーム</p>
+        <p class="work-desc-en">Explore a stylish room and capture mysterious life forms lurking within.</p>
+      </div>
+      <a class="work-cta" href="https://halsistm.github.io/ing/" target="_blank" rel="noopener">Open</a>
+    </div></div></div>
+  </div>
 
-    const extResEl = document.querySelector('script[type="__bundler/ext_resources"]');
-    const extResources = extResEl ? JSON.parse(extResEl.textContent) : [];
-    const resourceMap = {};
-    for (const entry of extResources) {
-      if (blobUrls[entry.uuid]) resourceMap[entry.id] = blobUrls[entry.uuid];
-    }
+  <div class="work" onclick="tw(this)">
+    <div class="work-row"><span class="work-num">05</span><span class="work-name">WebAudio SFX</span><span class="work-plus">+</span></div>
+    <div class="work-panel"><div class="work-panel-inner"><div class="work-panel-content">
+      <div class="work-desc">
+        <p class="work-desc-ja">2つの音を混ぜてコードを書き出す制作用アプリ</p>
+        <p class="work-desc-en">Blend two sounds together and export the code for your production.</p>
+      </div>
+      <a class="work-cta" href="https://halsistm.github.io/WebAudioAPISFX/" target="_blank" rel="noopener">Open</a>
+    </div></div></div>
+  </div>
 
-    setStatus('Rendering...');
-    for (const uuid of uuids) template = template.split(uuid).join(blobUrls[uuid]);
+  <div class="work" onclick="tw(this)">
+    <div class="work-row"><span class="work-num">06</span><span class="work-name">Slime Survival</span><span class="work-plus">+</span></div>
+    <div class="work-panel"><div class="work-panel-inner"><div class="work-panel-content">
+      <div class="work-desc">
+        <p class="work-desc-ja">スライムを倒して剣を伸ばすサバイバーゲーム</p>
+        <p class="work-desc-en">Defeat slimes, extend your sword, survive. A blade-growing roguelite.</p>
+      </div>
+      <a class="work-cta" href="https://halsistm.github.io/sl/" target="_blank" rel="noopener">Open</a>
+    </div></div></div>
+  </div>
 
-    // Strip integrity + crossorigin — blob URLs from a file:// document inherit
-    // a null origin, so crossorigin forces a CORS fetch that SRI then rejects.
-    // The manifest bytes are ours; SRI protects against CDN compromise, not this.
-    template = template.replace(/\s+integrity="[^"]*"/gi, '').replace(/\s+crossorigin="[^"]*"/gi, '');
+  <div class="work" onclick="tw(this)">
+    <div class="work-row"><span class="work-num">07</span><span class="work-name">ABDUCT</span><span class="work-plus">+</span></div>
+    <div class="work-panel"><div class="work-panel-inner"><div class="work-panel-content">
+      <div class="work-desc">
+        <p class="work-desc-ja">UFOにのって誘拐したり破壊したりする宇宙人ライフゲーム</p>
+        <p class="work-desc-en">Pilot a UFO. Abduct. Destroy. Live your best alien life.</p>
+      </div>
+      <a class="work-cta" href="https://halsistm.github.io/UFO/" target="_blank" rel="noopener">Open</a>
+    </div></div></div>
+  </div>
 
-    const resourceScript = '<script>window.__resources = ' +
-      JSON.stringify(resourceMap).split('</' + 'script>').join('<\\/' + 'script>') +
-      ';</' + 'script>';
-    // Inject after <head> so the DOCTYPE stays first; prepending the script
-    // would push the parser into quirks mode. DOMParser always emits a <head>
-    // (synthesizing one if the source HTML omitted it) but may carry
-    // attributes through, so match the full opening tag. slice() rather than
-    // replace() keeps us clear of $-pattern substitution in resourceScript.
-    const headOpen = template.match(/<head[^>]*>/i);
-    if (headOpen) {
-      const i = headOpen.index + headOpen[0].length;
-      template = template.slice(0, i) + resourceScript + template.slice(i);
-    }
+  <div class="work" onclick="tw(this)">
+    <div class="work-row"><span class="work-num">08</span><span class="work-name">3GRAVITY</span><span class="work-plus">+</span></div>
+    <div class="work-panel"><div class="work-panel-inner"><div class="work-panel-content">
+      <div class="work-desc">
+        <p class="work-desc-ja">石を3つ並べるパズルゲーム</p>
+        <p class="work-desc-en">A puzzle game. Line up three stones. Easier said than done.</p>
+      </div>
+      <a class="work-cta" href="https://halsistm.github.io/3GRAVITY/" target="_blank" rel="noopener">Open</a>
+    </div></div></div>
+  </div>
 
-    // Parse the template and swap the root element. Scripts inserted via
-    // DOMParser/replaceWith are inert per spec — re-create each with
-    // createElement so they execute, awaiting onload for src scripts to
-    // preserve ordering (React before ReactDOM before Babel before text/babel).
-    const doc = new DOMParser().parseFromString(template, 'text/html');
-    document.documentElement.replaceWith(doc.documentElement);
-    const dead = Array.from(document.scripts);
-    for (const old of dead) {
-      const s = document.createElement('script');
-      for (const a of old.attributes) s.setAttribute(a.name, a.value);
-      s.textContent = old.textContent;
-      // text/babel scripts with a src: fetch and inline. transformScriptTags
-      // does XHR against the src, but blob:null/ from a file:// origin is
-      // silently dropped. Inlining makes it a plain inline babel script,
-      // which transformScriptTags handles unconditionally.
-      if ((s.type === 'text/babel' || s.type === 'text/jsx') && s.src) {
-        const r = await fetch(s.src);
-        s.textContent = await r.text();
-        s.removeAttribute('src');
-      }
-      const p = s.src ? new Promise(function(r) { s.onload = s.onerror = r; }) : null;
-      old.replaceWith(s);
-      if (p) await p;
-    }
-    // Babel standalone auto-transforms type=text/babel on DOMContentLoaded,
-    // which fired before we swapped the document. Trigger manually if present.
-    if (window.Babel && typeof window.Babel.transformScriptTags === 'function') {
-      window.Babel.transformScriptTags();
-    }
-  } catch (err) {
-    setStatus('Error unpacking: ' + err.message);
-    console.error('Bundle unpack error:', err);
-  }
+  <div class="work" onclick="tw(this)">
+    <div class="work-row"><span class="work-num">09</span><span class="work-name">ACID KID // 256COLOR</span><span class="work-plus">+</span></div>
+    <div class="work-panel"><div class="work-panel-inner"><div class="work-panel-content">
+      <div class="work-desc">
+        <p class="work-desc-ja">写真を256色にするレトロジェネレーター</p>
+        <p class="work-desc-en">A retro generator that crushes your photos down to 256 colors.</p>
+      </div>
+      <a class="work-cta" href="https://halsistm.github.io/gen/" target="_blank" rel="noopener">Open</a>
+    </div></div></div>
+  </div>
+
+  <div class="work" onclick="tw(this)">
+    <div class="work-row"><span class="work-num">10</span><span class="work-name">ascii maze</span><span class="work-plus">+</span></div>
+    <div class="work-panel"><div class="work-panel-inner"><div class="work-panel-content">
+      <div class="work-desc">
+        <p class="work-desc-ja">アスキーアートでできた迷路を冒険するゲーム</p>
+        <p class="work-desc-en">Navigate a maze rendered entirely in ASCII art. Get lost beautifully.</p>
+      </div>
+      <a class="work-cta" href="https://halsistm.github.io/ascii/" target="_blank" rel="noopener">Open</a>
+    </div></div></div>
+  </div>
+
+</section>
+
+<footer>
+  <div class="footer-title">halsi<span>_</span></div>
+  <div class="footer-right">
+    <img class="footer-qr" src="qr.png" alt="QR">
+    <span class="footer-copy">© 2025 halsi</span>
+  </div>
+</footer>
+
+<script>
+function tw(el) {
+  const was = el.classList.contains('open');
+  document.querySelectorAll('.work.open').forEach(w => w.classList.remove('open'));
+  if (!was) el.classList.add('open');
+}
+
+document.getElementById('dnToggle').addEventListener('click', function() {
+  document.body.classList.toggle('is-night');
+  this.textContent = document.body.classList.contains('is-night') ? '☾ Night' : '☀ Day';
 });
 
-  </script>
-
-  <script type="__bundler/manifest">
-{"bffe5b8a-f288-4563-9ae5-a7083122eb59":{"mime":"image/png","compressed":false,"data":"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"}}
-  </script>
-
-  <script type="__bundler/ext_resources">
-[]
-  </script>
-
-  <script type="__bundler/template">
-"<!DOCTYPE html>\n<html lang=\"ja\"><head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>halsi_<\u002Ftitle>\n\n\n\n<!-- ═══ SVG FILTER BANK ═══ -->\n<\u002Fhead><body><svg style=\"position:absolute;width:0;height:0;overflow:hidden\" aria-hidden=\"true\">\n  <defs>\n    <!-- Ink wobble for titles -->\n    <filter id=\"ink-title\" x=\"-4%\" y=\"-15%\" width=\"108%\" height=\"130%\">\n      <feTurbulence type=\"turbulence\" baseFrequency=\"0.03 0.025\" numOctaves=\"3\" seed=\"5\" result=\"t\">\n        <animate attributeName=\"seed\" values=\"5;12;3;19;7;5\" dur=\"9s\" repeatCount=\"indefinite\"><\u002Fanimate>\n        <animate attributeName=\"baseFrequency\" values=\"0.03 0.025;0.035 0.028;0.03 0.022;0.03 0.025\" dur=\"5s\" repeatCount=\"indefinite\"><\u002Fanimate>\n      <\u002FfeTurbulence>\n      <feDisplacementMap in=\"SourceGraphic\" in2=\"t\" scale=\"3.5\" xChannelSelector=\"R\" yChannelSelector=\"G\"><\u002FfeDisplacementMap>\n    <\u002Ffilter>\n    <!-- Lighter wobble for body text -->\n    <filter id=\"ink-body\" x=\"-3%\" y=\"-20%\" width=\"106%\" height=\"140%\">\n      <feTurbulence type=\"turbulence\" baseFrequency=\"0.05 0.03\" numOctaves=\"2\" seed=\"11\" result=\"t\">\n        <animate attributeName=\"seed\" values=\"11;4;17;8;11\" dur=\"13s\" repeatCount=\"indefinite\"><\u002Fanimate>\n      <\u002FfeTurbulence>\n      <feDisplacementMap in=\"SourceGraphic\" in2=\"t\" scale=\"1.8\" xChannelSelector=\"R\" yChannelSelector=\"G\"><\u002FfeDisplacementMap>\n    <\u002Ffilter>\n    <!-- Ink stamp for numbers -->\n    <filter id=\"ink-stamp\" x=\"-10%\" y=\"-10%\" width=\"120%\" height=\"120%\">\n      <feTurbulence type=\"turbulence\" baseFrequency=\"0.08\" numOctaves=\"4\" seed=\"3\" result=\"t\"><\u002FfeTurbulence>\n      <feDisplacementMap in=\"SourceGraphic\" in2=\"t\" scale=\"2\" xChannelSelector=\"R\" yChannelSelector=\"G\" result=\"d\"><\u002FfeDisplacementMap>\n      <feComposite in=\"d\" in2=\"SourceGraphic\" operator=\"in\"><\u002FfeComposite>\n    <\u002Ffilter>\n    <!-- Ink bleed hover -->\n    <filter id=\"ink-bleed\" x=\"-8%\" y=\"-15%\" width=\"116%\" height=\"130%\">\n      <feTurbulence type=\"turbulence\" baseFrequency=\"0.035\" numOctaves=\"3\" seed=\"7\" result=\"t\">\n        <animate attributeName=\"seed\" values=\"7;14;2;7\" dur=\"6s\" repeatCount=\"indefinite\"><\u002Fanimate>\n      <\u002FfeTurbulence>\n      <feDisplacementMap in=\"SourceGraphic\" in2=\"t\" scale=\"6\" xChannelSelector=\"R\" yChannelSelector=\"G\"><\u002FfeDisplacementMap>\n    <\u002Ffilter>\n    <!-- Paper roughen for lines/borders -->\n    <filter id=\"roughen\" x=\"-2%\" y=\"-30%\" width=\"104%\" height=\"160%\">\n      <feTurbulence type=\"turbulence\" baseFrequency=\"0.06 0.01\" numOctaves=\"2\" seed=\"9\" result=\"t\"><\u002FfeTurbulence>\n      <feDisplacementMap in=\"SourceGraphic\" in2=\"t\" scale=\"2\" xChannelSelector=\"R\" yChannelSelector=\"G\"><\u002FfeDisplacementMap>\n    <\u002Ffilter>\n  <\u002Fdefs>\n<\u002Fsvg>\n\n<style>\n@property --ink-spread {\n  syntax: '<number>';\n  inherits: false;\n  initial-value: 0;\n}\n\n*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }\n\n:root {\n  --paper:   #f0ead8;\n  --paper2:  #e8e0ca;\n  --ink:     #1a130c;\n  --ink2:    #2e2318;\n  --faded:   #7a6a52;\n  --veryfaded: #b0a080;\n  --red-ink: #7a2218;\n  --blue-ink:#2a3d5a;\n  --line:    rgba(90,75,50,0.18);\n}\n\nhtml { scroll-behavior:smooth; }\n\nbody {\n  background: var(--paper);\n  color: var(--ink);\n  font-family: \"Hiragino Mincho ProN\", \"Yu Mincho\", \"BIZ UDMincho\", \"Georgia\", serif;\n  min-height: 100vh;\n  position: relative;\n  overflow-x: hidden;\n}\n\n/* ═══ PAPER CANVAS ═══ */\n#paper-canvas {\n  position: fixed;\n  inset: 0;\n  z-index: 0;\n  pointer-events: none;\n  opacity: 1;\n}\n\n/* ═══ CONTENT WRAP ═══ */\n.page {\n  position: relative;\n  z-index: 10;\n  max-width: 720px;\n  margin: 0 auto;\n  padding: 10vh 5vw 14vh;\n}\n\n/* ═══ HEADER ═══ */\n.site-title {\n  font-family: \"Bradley Hand\", \"Chalkboard SE\", \"Segoe Print\", cursive;\n  font-size: clamp(4.5rem, 14vw, 9rem);\n  font-weight: 700;\n  color: var(--ink);\n  line-height: 0.9;\n  letter-spacing: -0.02em;\n  filter: url(#ink-title);\n  display: inline-block;\n  margin-bottom: 0.1em;\n  opacity: 0;\n  animation: ink-draw 0.9s cubic-bezier(0.4,0,0.2,1) forwards 0.1s;\n}\n\n.site-sub {\n  font-family: \"Bradley Hand\", \"Chalkboard SE\", \"Segoe Print\", cursive;\n  font-size: 1.1rem;\n  color: var(--faded);\n  letter-spacing: 0.06em;\n  filter: url(#ink-body);\n  opacity: 0;\n  animation: ink-draw 0.7s ease forwards 0.5s;\n  display: block;\n  margin-bottom: 0.5em;\n}\n\n.header-rule {\n  width: 100%;\n  height: 2px;\n  background: var(--ink);\n  filter: url(#roughen);\n  margin: 1.0em 0 1.6em;\n  opacity: 0;\n  animation: ink-draw 0.6s ease forwards 0.7s;\n  transform-origin: left;\n}\n\n/* ═══ WORKS ═══ */\n.works { display:flex; flex-direction:column; gap:0; }\n\n.work {\n  position: relative;\n  padding: 1.0em 0 0.9em;\n  border-bottom: 1.5px solid var(--ink);\n  text-decoration: none;\n  color: inherit;\n  display: grid;\n  grid-template-columns: 3.8em 1fr;\n  gap: 0 1em;\n  align-items: start;\n  overflow: hidden;\n  opacity: 0;\n  animation: ink-draw 0.6s ease forwards;\n  filter: url(#roughen);\n  transition: filter 0.3s;\n}\n.work:last-child { border-bottom: none; }\n\n/* stagger */\n.work:nth-child(1)  { animation-delay: 0.9s; }\n.work:nth-child(2)  { animation-delay: 1.05s; }\n.work:nth-child(3)  { animation-delay: 1.2s; }\n.work:nth-child(4)  { animation-delay: 1.35s; }\n.work:nth-child(5)  { animation-delay: 1.5s; }\n.work:nth-child(6)  { animation-delay: 1.65s; }\n.work:nth-child(7)  { animation-delay: 1.8s; }\n.work:nth-child(8)  { animation-delay: 1.95s; }\n.work:nth-child(9)  { animation-delay: 2.1s; }\n.work:nth-child(10) { animation-delay: 2.25s; }\n\n/* Ink wash hover effect */\n.work::before {\n  content: '';\n  position: absolute;\n  inset: 0;\n  background: radial-gradient(ellipse 120% 80% at 50% 50%, rgba(26,19,12,0.06) 0%, transparent 70%);\n  opacity: 0;\n  transition: opacity 0.5s ease;\n  pointer-events: none;\n  filter: url(#ink-bleed);\n}\n.work:hover::before { opacity: 1; }\n.work:hover { filter: url(#ink-title); }\n\n/* NUMBER */\n.num {\n  font-family: \"Bradley Hand\", \"Chalkboard SE\", \"Segoe Print\", cursive;\n  font-size: 2.8rem;\n  font-weight: 700;\n  color: var(--red-ink);\n  line-height: 1;\n  filter: url(#ink-stamp);\n  letter-spacing: -0.03em;\n  padding-top: 0.1em;\n  transition: transform 0.3s;\n  display: block;\n}\n.work:hover .num { transform: rotate(-3deg) scale(1.08); }\n\n/* CONTENT BLOCK */\n.content { display: flex; flex-direction: column; gap: 0.25em; }\n\n.title {\n  font-family: \"Bradley Hand\", \"Chalkboard SE\", \"Segoe Print\", cursive;\n  font-size: clamp(1.5rem, 4vw, 2.1rem);\n  font-weight: 600;\n  color: var(--ink);\n  line-height: 1.1;\n  letter-spacing: 0.02em;\n  filter: url(#ink-title);\n  transition: color 0.25s;\n  display: block;\n}\n.work:hover .title { color: var(--ink2); }\n\n.desc-ja {\n  font-family: \"Hiragino Mincho ProN\", \"Yu Mincho\", \"BIZ UDMincho\", serif;\n  font-size: 0.88rem;\n  color: var(--faded);\n  line-height: 1.65;\n  filter: url(#ink-body);\n  display: block;\n  text-wrap: pretty;\n}\n\n.desc-en {\n  font-family: 'Caveat', cursive;\n  font-size: 0.82rem;\n  color: var(--blue-ink);\n  line-height: 1.55;\n  filter: url(#ink-body);\n  display: block;\n  opacity: 0.85;\n  text-wrap: pretty;\n}\n\n.work-url {\n  font-family: 'Klee One', monospace;\n  font-size: 0.55rem;\n  color: var(--veryfaded);\n  letter-spacing: 0.06em;\n  filter: url(#ink-body);\n  display: block;\n  margin-top: 0.3em;\n  opacity: 0;\n  transition: opacity 0.3s;\n}\n.work:hover .work-url { opacity: 1; }\n\n/* ═══ FOOTER ═══ */\n.footer {\n  margin-top: 5vh;\n  display: flex;\n  align-items: flex-end;\n  gap: 2em;\n  opacity: 0;\n  animation: ink-draw 0.8s ease forwards 2.6s;\n}\n\n.qr-wrap {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: 0.5em;\n}\n.qr-img {\n  width: 72px;\n  height: 72px;\n  filter: sepia(0.6) contrast(1.1) opacity(0.75);\n  mix-blend-mode: multiply;\n}\n.qr-label {\n  font-family: \"Bradley Hand\", \"Chalkboard SE\", \"Segoe Print\", cursive;\n  font-size: 0.65rem;\n  color: var(--faded);\n  letter-spacing: 0.1em;\n  text-align: center;\n  filter: url(#ink-body);\n}\n\n.footer-sig {\n  font-family: \"Bradley Hand\", \"Chalkboard SE\", \"Segoe Print\", cursive;\n  font-size: 1.2rem;\n  color: var(--faded);\n  filter: url(#ink-title);\n  line-height: 1.4;\n}\n\n/* ═══ ANIMATIONS ═══ */\n@keyframes ink-draw {\n  from { opacity: 0; clip-path: inset(0 100% 0 0); }\n  to   { opacity: 1; clip-path: inset(0 0% 0 0); }\n}\n\n/* ═══ NOTEBOOK LINES ═══ */\n.page::before {\n  content: '';\n  position: fixed;\n  inset: 0;\n  background-image: repeating-linear-gradient(\n    to bottom,\n    transparent 0px,\n    transparent 31px,\n    var(--line) 31px,\n    var(--line) 32px\n  );\n  pointer-events: none;\n  z-index: 1;\n}\n\n/* ═══ QR MODAL ═══ */\n#qr-modal {\n  position: fixed;\n  inset: 0;\n  z-index: 2000;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  pointer-events: none;\n  opacity: 0;\n  transition: opacity 0.35s ease;\n}\n#qr-modal.open {\n  pointer-events: all;\n  opacity: 1;\n}\n#qr-modal-bg {\n  position: absolute;\n  inset: 0;\n  background: rgba(26,19,12,0.55);\n  backdrop-filter: blur(6px);\n  -webkit-backdrop-filter: blur(6px);\n  cursor: pointer;\n}\n#qr-modal-card {\n  position: relative;\n  z-index: 1;\n  background: var(--paper);\n  border: 2px solid var(--ink);\n  padding: 2.2em 2.4em 1.8em;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: 1em;\n  filter: url(#roughen);\n  transform: scale(0.85) rotate(-1.5deg);\n  transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);\n  box-shadow: 4px 5px 0 rgba(26,19,12,0.15);\n}\n#qr-modal.open #qr-modal-card {\n  transform: scale(1) rotate(-1deg);\n}\n#qr-modal-img {\n  width: min(72vw, 320px);\n  height: min(72vw, 320px);\n  object-fit: contain;\n  filter: sepia(0.2) contrast(1.1);\n  display: block;\n}\n#qr-modal-label {\n  font-family: \"Bradley Hand\", \"Chalkboard SE\", \"Segoe Print\", cursive;\n  font-size: 1.1rem;\n  color: var(--faded);\n  letter-spacing: 0.1em;\n  filter: url(#ink-body);\n}\n#qr-modal-close {\n  position: absolute;\n  top: 0.5em;\n  right: 0.7em;\n  background: none;\n  border: none;\n  font-family: \"Bradley Hand\", \"Chalkboard SE\", \"Segoe Print\", cursive;\n  font-size: 1.3rem;\n  color: var(--faded);\n  cursor: pointer;\n  line-height: 1;\n  transition: color 0.2s, transform 0.2s;\n}\n#qr-modal-close:hover { color: var(--red-ink); transform: rotate(12deg) scale(1.2); }\n\n/* ═══ RESPONSIVE ═══ */\n@media (max-width:600px) {\n  .page { padding: 8vw 6vw 12vw; }\n  .work { grid-template-columns: 2.8em 1fr; }\n  .num { font-size: 2rem; }\n}\n<\u002Fstyle>\n\n\n\n<!-- ═══ PAPER TEXTURE ═══ -->\n<canvas id=\"paper-canvas\"><\u002Fcanvas>\n\n<div class=\"page\">\n\n  <!-- HEADER -->\n  <header>\n    <span class=\"site-title\">halsi_<\u002Fspan>\n    <span class=\"site-sub\">works &amp; experiments<\u002Fspan>\n    <div class=\"header-rule\"><\u002Fdiv>\n  <\u002Fheader>\n\n  <!-- WORKS (rendered by JS — add entries to the WORKS array in the script) -->\n  <main class=\"works\" id=\"works-list\"><\u002Fmain>\n\n  <!-- FOOTER -->\n  <footer class=\"footer\">\n    <div class=\"qr-wrap\" id=\"qr-btn\" role=\"button\" tabindex=\"0\" aria-label=\"QRコードを拡大表示\" style=\"cursor:pointer;\">\n      <img src=\"bffe5b8a-f288-4563-9ae5-a7083122eb59\" class=\"qr-img\" alt=\"QR\">\n      <span class=\"qr-label\">tap to scan<\u002Fspan>\n    <\u002Fdiv>\n    <div class=\"footer-sig\">\n      // end of transmission<br>\n      <span style=\"font-size:0.75em;color:var(--veryfaded);\">halsistm.github.io<\u002Fspan>\n    <\u002Fdiv>\n  <\u002Ffooter>\n\n<!-- QR MODAL -->\n<div id=\"qr-modal\" aria-hidden=\"true\">\n  <div id=\"qr-modal-bg\"><\u002Fdiv>\n  <div id=\"qr-modal-card\">\n    <img src=\"bffe5b8a-f288-4563-9ae5-a7083122eb59\" id=\"qr-modal-img\" alt=\"QR Code\">\n    <span id=\"qr-modal-label\">halsistm.github.io<\u002Fspan>\n    <button id=\"qr-modal-close\" aria-label=\"閉じる\">✕<\u002Fbutton>\n  <\u002Fdiv>\n<\u002Fdiv>\n\n<\u002Fdiv>\n\n<script>\n/* ═══ WORKS DATA — 新作追加はここに1オブジェクト足すだけ ═══ */\nconst WORKS = [\n  {\n    title: 'やみのもんすと',\n    url:   'https://halsistm.github.io/monsss/',\n    ja:    'モンストがメンテになると浮上する闇のモンスト',\n    en:    'The dark MonSt that rises from the depths during maintenance.',\n  },\n  {\n    title: 'EC倉庫',\n    url:   'https://halsistm.github.io/ec/',\n    ja:    '倉庫で働いている気分を充分に味わえる労働アプリ',\n    en:    'A labor app that lets you fully experience the thrill of warehouse work.',\n  },\n  {\n    title: 'Say Goodnight',\n    url:   'https://halsistm.github.io/say/',\n    ja:    '浅くて広いやつはセイグッナイするゲーム　それ以外はこんにちわ',\n    en:    'Goodnight to the shallow & wide. Hello to everyone else.',\n  },\n  {\n    title: '∞Gallery',\n    url:   'https://halsistm.github.io/ing/',\n    ja:    'おしゃれなルームを冒険して謎の生命体を捕獲するゲーム',\n    en:    'Explore a stylish room and capture mysterious life forms lurking within.',\n  },\n  {\n    title: 'WebAudioAPISFX',\n    url:   'https://halsistm.github.io/WebAudioAPISFX/',\n    ja:    '2つの音を混ぜてコードを書き出す制作用アプリ',\n    en:    'Blend two sounds together and export the code for your production.',\n  },\n  {\n    title: 'Slime Survival',\n    url:   'https://halsistm.github.io/sl/',\n    ja:    'スライムを倒して剣を伸ばすサバイバーゲーム',\n    en:    'Defeat slimes, extend your sword, survive. A blade-growing roguelite.',\n  },\n  {\n    title: 'ABDUCT',\n    url:   'https://halsistm.github.io/UFO/',\n    ja:    'UFOにのって誘拐したり破壊したりする宇宙人ライフゲーム',\n    en:    'Pilot a UFO. Abduct. Destroy. Live your best alien life.',\n  },\n  {\n    title: '3GRAVITY',\n    url:   'https://halsistm.github.io/3GRAVITY/',\n    ja:    '石を3つ並べるパズルゲーム',\n    en:    'A puzzle game. Line up three stones. Easier said than done.',\n  },\n  {\n    title: 'ACID KID // 256COLOR CRUSHER',\n    url:   'https://halsistm.github.io/gen/',\n    ja:    '写真を256色にするレトロジェネレーター',\n    en:    'A retro generator that crushes your photos down to 256 colors.',\n  },\n  {\n    title: 'ascii maze',\n    url:   'https://halsistm.github.io/ascii/',\n    ja:    'アスキーアートでできた迷路を冒険するゲーム',\n    en:    'Navigate a maze rendered entirely in ASCII art. Get lost beautifully.',\n  },\n];\n\n/* ── RENDER ── */\n(function(){\n  const list = document.getElementById('works-list');\n  const BASE_DELAY = 0.9; // first item delay (s)\n  const STEP = 0.13;      // delay between items (s)\n\n  WORKS.forEach((w, i) => {\n    const num = String(i + 1).padStart(2, '0');\n    const shortUrl = w.url.replace(/^https?:\\/\\//, '').replace(/\\/$/, '');\n    const delay = (BASE_DELAY + i * STEP).toFixed(2);\n\n    const a = document.createElement('a');\n    a.className = 'work';\n    a.href = w.url;\n    a.target = '_blank';\n    a.rel = 'noopener';\n    a.style.animationDelay = delay + 's';\n    a.style.animationPlayState = 'paused';\n    a.innerHTML = `\n      <span class=\"num\">${num}<\u002Fspan>\n      <div class=\"content\">\n        <span class=\"title\">${w.title}<\u002Fspan>\n        <span class=\"desc-ja\">${w.ja}<\u002Fspan>\n        <span class=\"desc-en\">${w.en}<\u002Fspan>\n        <span class=\"work-url\">${shortUrl}<\u002Fspan>\n      <\u002Fdiv>`;\n    list.appendChild(a);\n  });\n})();\n\n/* ═══ PAPER TEXTURE CANVAS ═══ */\n(function(){\n  const cv = document.getElementById('paper-canvas');\n  const ctx = cv.getContext('2d');\n\n  function draw(){\n    const W = cv.width  = window.innerWidth;\n    const H = cv.height = window.innerHeight;\n\n    // base paper color\n    ctx.fillStyle = '#f0ead8';\n    ctx.fillRect(0,0,W,H);\n\n    // grain\n    const img = ctx.createImageData(W, H);\n    const d = img.data;\n    for(let i=0; i<d.length; i+=4){\n      const g = 220 + Math.random()*35;\n      const warm = Math.random()*8;\n      d[i]   = g + warm;\n      d[i+1] = g - 4 + warm*0.5;\n      d[i+2] = g - 18;\n      d[i+3] = Math.floor(Math.random()*38 + 8);\n    }\n    ctx.putImageData(img, 0, 0);\n\n    // subtle vertical fiber streaks\n    for(let i=0; i<80; i++){\n      const x = Math.random()*W;\n      const h = Math.random()*H*0.3+H*0.1;\n      const y = Math.random()*H;\n      const alpha = Math.random()*0.04;\n      ctx.beginPath();\n      ctx.moveTo(x,y);\n      ctx.lineTo(x+(Math.random()-0.5)*3, y+h);\n      ctx.strokeStyle=`rgba(100,80,40,${alpha})`;\n      ctx.lineWidth=Math.random()*1.2;\n      ctx.stroke();\n    }\n\n    // ink blots (subtle)\n    for(let i=0;i<6;i++){\n      const x=Math.random()*W, y=Math.random()*H;\n      const r=Math.random()*18+4;\n      const g=ctx.createRadialGradient(x,y,0,x,y,r);\n      g.addColorStop(0,`rgba(40,25,10,${Math.random()*0.06})`);\n      g.addColorStop(1,'rgba(40,25,10,0)');\n      ctx.beginPath();\n      ctx.arc(x,y,r,0,Math.PI*2);\n      ctx.fillStyle=g;\n      ctx.fill();\n    }\n\n    // coffee stain rings\n    for(let i=0;i<3;i++){\n      const x=Math.random()*W, y=Math.random()*H;\n      const r=Math.random()*60+30;\n      ctx.beginPath();\n      ctx.arc(x,y,r,0,Math.PI*2);\n      ctx.strokeStyle=`rgba(140,100,50,${Math.random()*0.04+0.01})`;\n      ctx.lineWidth=Math.random()*3+1;\n      ctx.stroke();\n    }\n  }\n\n  draw();\n  window.addEventListener('resize', draw);\n})();\n\n/* ═══ SUBTLE CURSOR TRAIL ═══ */\n(function(){\n  const dots=[];\n  const MAX=8;\n  for(let i=0;i<MAX;i++){\n    const d=document.createElement('div');\n    d.style.cssText=`position:fixed;width:${6-i*0.5}px;height:${6-i*0.5}px;border-radius:50%;background:rgba(26,19,12,${0.3-i*0.03});pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:none;`;\n    document.body.appendChild(d);\n    dots.push({el:d,x:-100,y:-100});\n  }\n  let mx=-100,my=-100;\n  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});\n  (function anim(){\n    let px=mx,py=my;\n    dots.forEach((d,i)=>{\n      d.x+=(px-d.x)*(0.4-i*0.03);\n      d.y+=(py-d.y)*(0.4-i*0.03);\n      d.el.style.left=d.x+'px';\n      d.el.style.top=d.y+'px';\n      px=d.x; py=d.y;\n    });\n    requestAnimationFrame(anim);\n  })();\n})();\n\n/* ═══ QR MODAL JS ═══ */\n(function(){\n  const modal = document.getElementById('qr-modal');\n  const bg    = document.getElementById('qr-modal-bg');\n  const btn   = document.getElementById('qr-btn');\n  const close = document.getElementById('qr-modal-close');\n\n  function open(){\n    modal.classList.add('open');\n    modal.setAttribute('aria-hidden','false');\n    document.body.style.overflow='hidden';\n  }\n  function shut(){\n    modal.classList.remove('open');\n    modal.setAttribute('aria-hidden','true');\n    document.body.style.overflow='';\n  }\n\n  btn.addEventListener('click', open);\n  btn.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' ') open(); });\n  bg.addEventListener('click', shut);\n  close.addEventListener('click', shut);\n  document.addEventListener('keydown', e=>{ if(e.key==='Escape') shut(); });\n})();\n\n/* ═══ ANIMATED SVG TURBULENCE (JS bump for title) ═══ */\n(function(){\n  // Periodically re-seed stamp filter for organic feel\n  const stamp = document.querySelector('#ink-stamp feTurbulence');\n  if(stamp){\n    setInterval(()=>{\n      stamp.setAttribute('seed', Math.floor(Math.random()*20)+1);\n    }, 3000);\n  }\n})();\n\n/* ═══ INTERSECTION OBSERVER — re-trigger ink-draw on scroll ═══ */\n(function(){\n  const obs = new IntersectionObserver((entries)=>{\n    entries.forEach(e=>{\n      if(e.isIntersecting){\n        e.target.style.animationPlayState='running';\n        obs.unobserve(e.target);\n      }\n    });\n  },{threshold:0.08});\n  // Works are rendered dynamically, so observe after DOM is ready\n  document.querySelectorAll('.work').forEach(w => obs.observe(w));\n})();\n<\u002Fscript>\n\n\n<\u002Fbody><\u002Fhtml>"
-  </script>
+// smooth cursor
+const cur = document.getElementById('cursor');
+let mx=0, my=0, cx=0, cy=0;
+document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; });
+(function loop() {
+  cx += (mx-cx)*.16; cy += (my-cy)*.16;
+  cur.style.left = cx+'px'; cur.style.top = cy+'px';
+  requestAnimationFrame(loop);
+})();
+document.querySelectorAll('.work,.work-cta,.day-night').forEach(el => {
+  el.addEventListener('mouseenter', () => cur.classList.add('big'));
+  el.addEventListener('mouseleave', () => cur.classList.remove('big'));
+});
+</script>
 </body>
 </html>
